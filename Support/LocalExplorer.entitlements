@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Direct-distribution build (default): not sandboxed, hardened runtime, and no
+  network entitlement is needed because the app makes no network connections.
+
+  For a Mac App Store build use LocalExplorer.sandboxed.entitlements instead.
+-->
+<plist version="1.0">
+<dict>
+</dict>
+</plist>

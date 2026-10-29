@@ -1,0 +1,82 @@
+# XcodeGen spec: `xcodegen generate` (or `make xcodeproj`) creates LocalExplorer.xcodeproj
+# with the app, the ExplorerCore unit tests (from Package.swift) and the UI tests.
+# The Swift package remains the primary build; this project adds UI testing and the
+# usual Xcode workflow. Nothing here needs network access.
+name: LocalExplorer
+options:
+  bundleIdPrefix: app.localexplorer
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    ARCHS: arm64
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    DEAD_CODE_STRIPPING: YES
+packages:
+  LocalExplorerPackage:
+    path: .
+targets:
+  LocalExplorer:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/LocalExplorer
+    dependencies:
+      - package: LocalExplorerPackage
+        product: ExplorerCore
+      - sdk: QuickLookThumbnailing.framework
+      - sdk: Quartz.framework
+      - sdk: AVKit.framework
+      - sdk: PDFKit.framework
+    info:
+      path: build/xcode/Info.plist
+      properties:
+        CFBundleDisplayName: Local Explorer
+        CFBundleName: Local Explorer
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        LSMinimumSystemVersion: "14.0"
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: Offline file manager. No network access.
+        NSDesktopFolderUsageDescription: Local Explorer lists and manages files in your Desktop folder when you browse it.
+        NSDocumentsFolderUsageDescription: Local Explorer lists and manages files in your Documents folder when you browse it.
+        NSDownloadsFolderUsageDescription: Local Explorer lists and manages files in your Downloads folder when you browse it.
+        NSRemovableVolumesUsageDescription: Local Explorer lists and manages files on removable drives when you browse them.
+        NSNetworkVolumesUsageDescription: Local Explorer lists files on network volumes you have already mounted. It never connects to servers itself.
+    entitlements:
+      path: Support/LocalExplorer.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.localexplorer.LocalExplorer
+        PRODUCT_NAME: Local Explorer
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+  LocalExplorerUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: LocalExplorer
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.localexplorer.LocalExplorerUITests
+        TEST_TARGET_NAME: LocalExplorer
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  LocalExplorer:
+    build:
+      targets:
+        LocalExplorer: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - package: LocalExplorerPackage/ExplorerCoreTests
+        - LocalExplorerUITests

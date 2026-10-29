@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>__APP_NAME__</string>
+	<key>CFBundleName</key>
+	<string>__APP_NAME__</string>
+	<key>CFBundleExecutable</key>
+	<string>LocalExplorer</string>
+	<key>CFBundleIdentifier</key>
+	<string>__BUNDLE_ID__</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>__VERSION__</string>
+	<key>CFBundleVersion</key>
+	<string>__BUILD__</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSSupportsAutomaticTermination</key>
+	<false/>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Offline file manager. No network access.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>__APP_NAME__ lists and manages files in your Desktop folder when you browse it.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>__APP_NAME__ lists and manages files in your Documents folder when you browse it.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>__APP_NAME__ lists and manages files in your Downloads folder when you browse it.</string>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>__APP_NAME__ lists and manages files on removable drives when you browse them.</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>__APP_NAME__ lists files on network volumes you have already mounted. It never connects to servers itself.</string>
+</dict>
+</plist>
