@@ -32,6 +32,8 @@ final class TabModel: ObservableObject, Identifiable {
     private var loadTask: Task<Void, Never>?
     /// Called after a successful navigation (not on refresh), e.g. to record recents.
     var onVisit: ((URL) -> Void)?
+    /// Hidden-file visibility for a folder; consulted whenever the tab enters one.
+    var showsHiddenFiles: ((URL) -> Bool)?
 
     init(url: URL, preferences: AppPreferences, fileSystem: FileSystemProviding) {
         self.history = NavigationHistory(start: url)
@@ -45,8 +47,12 @@ final class TabModel: ObservableObject, Identifiable {
 
     var currentURL: URL { history.current }
 
+    /// True while showing the "This Mac" start page instead of a folder.
+    var isThisMac: Bool { ThisMac.isThisMac(currentURL) }
+
     var title: String {
-        currentURL.path == "/" ? "Computer" : FileManager.default.displayName(atPath: currentURL.path)
+        if isThisMac { return ThisMac.title }
+        return currentURL.path == "/" ? "Computer" : FileManager.default.displayName(atPath: currentURL.path)
     }
 
     var itemIDs: [String] { items.map(\.id) }
@@ -71,8 +77,11 @@ final class TabModel: ObservableObject, Identifiable {
         return selectedItems.first
     }
 
+    /// The enclosing folder; the top of the filesystem leads up to the "This Mac" page.
     var parentURL: URL? {
-        currentURL.path == "/" ? nil : currentURL.deletingLastPathComponent().standardizedFileURL
+        if isThisMac { return nil }
+        if currentURL.path == "/" { return ThisMac.url }
+        return currentURL.deletingLastPathComponent().standardizedFileURL
     }
 
     var selectedBytes: Int64? {
@@ -138,6 +147,20 @@ final class TabModel: ObservableObject, Identifiable {
     private func load(visit: Bool, preserveSelection: Bool = false, selecting: [URL]? = nil) {
         loadTask?.cancel()
         let url = currentURL
+        if visit, let showsHiddenFiles { showHidden = showsHiddenFiles(url) }
+        if isThisMac {
+            // Nothing to enumerate: the page builds itself from the standard folders and
+            // mounted volumes.
+            allItems = []
+            items = []
+            watcher = nil
+            selectionModel.clear()
+            isFolderWritable = false
+            availableCapacity = nil
+            loadState = .loaded
+            if visit { onVisit?(url) }
+            return
+        }
         let previous = selectionModel
         if !preserveSelection {
             selectionModel.clear()

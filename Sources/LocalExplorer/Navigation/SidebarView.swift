@@ -46,6 +46,8 @@ struct SidebarView: View {
             Color.clear.frame(height: 40)
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 10) {
+                    SidebarRow(name: ThisMac.title, symbol: "desktopcomputer", tint: .gray, url: ThisMac.url,
+                               isCurrent: tab.isThisMac, model: model) {}
                     section("Favorites", id: "favorites", dropAction: addFavorites) {
                         if services.state.favorites.isEmpty {
                             Text("Drag folders here")
@@ -125,7 +127,7 @@ struct SidebarView: View {
         .onChange(of: tab.showHidden) { _, value in tree.setShowHidden(value) }
         // A listing finishing means the folder may have gained or lost subfolders.
         .onChange(of: tab.loadState) { _, state in
-            if state == .loaded { tree.refresh(tab.currentURL) }
+            if state == .loaded, !tab.isThisMac { tree.refresh(tab.currentURL) }
         }
     }
 
@@ -138,6 +140,7 @@ struct SidebarView: View {
     }
 
     private func reveal(_ url: URL) {
+        guard !ThisMac.isThisMac(url) else { return }
         tree.reveal(url, roots: treeRoots)
     }
 

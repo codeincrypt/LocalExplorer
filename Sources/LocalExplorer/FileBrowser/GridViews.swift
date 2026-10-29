@@ -99,10 +99,13 @@ struct TilesView: View {
                             TileCell(item: item, isSelected: tab.selection.contains(item.id), tileSize: tileSize, model: model, services: services)
                                 .frame(width: cellWidth)
                                 .modifier(ItemInteraction(item: item, model: model, tab: tab, focus: focus))
+                                .marqueeItem(item.id)
                                 .id(item.id)
                         }
                     }
                     .padding(padding)
+                    .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .top)
+                    .marqueeSelection(tab: tab, model: model, focus: focus)
                 }
                 .onChange(of: tab.selectionModel.cursor) { _, cursor in
                     if let cursor { scroller.scrollTo(cursor) }
@@ -112,7 +115,6 @@ struct TilesView: View {
             .onChange(of: proxy.size.width) { _, width in columns = columnCount(width) }
             .onChange(of: tileSize) { _, _ in columns = columnCount(proxy.size.width) }
         }
-        .background(BackgroundClickCatcher(tab: tab, model: model, focus: focus))
         .focusable()
         .focusEffectDisabled()
         .focused(focus, equals: .fileList)
@@ -198,10 +200,13 @@ struct CompactListView: View {
                             CompactRow(item: item, isSelected: tab.selection.contains(item.id), model: model)
                                 .frame(width: 250, alignment: .leading)
                                 .modifier(ItemInteraction(item: item, model: model, tab: tab, focus: focus))
+                                .marqueeItem(item.id)
                                 .id(item.id)
                         }
                     }
                     .padding(padding)
+                    .frame(minWidth: proxy.size.width, maxHeight: .infinity, alignment: .topLeading)
+                    .marqueeSelection(tab: tab, model: model, focus: focus)
                 }
                 .onChange(of: tab.selectionModel.cursor) { _, cursor in
                     if let cursor { scroller.scrollTo(cursor) }
@@ -210,7 +215,6 @@ struct CompactListView: View {
             .onAppear { rows = rowCount(proxy.size.height) }
             .onChange(of: proxy.size.height) { _, height in rows = rowCount(height) }
         }
-        .background(BackgroundClickCatcher(tab: tab, model: model, focus: focus))
         .focusable()
         .focusEffectDisabled()
         .focused(focus, equals: .fileList)

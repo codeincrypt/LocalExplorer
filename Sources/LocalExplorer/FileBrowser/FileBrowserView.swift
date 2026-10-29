@@ -15,6 +15,8 @@ struct FileBrowserView: View {
     var body: some View {
         ZStack {
             switch tab.loadState {
+            case _ where tab.isThisMac:
+                ThisMacView(model: model, tab: tab, volumes: services.volumes)
             case .failed(let error):
                 ErrorStateView(error: error, model: model, tab: tab)
             default:

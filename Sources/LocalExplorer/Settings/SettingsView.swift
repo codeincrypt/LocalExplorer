@@ -35,11 +35,11 @@ private struct GeneralSettings: View {
             }
             Toggle("Ascending", isOn: $services.state.preferences.sort.ascending)
             Toggle("Keep folders on top", isOn: $services.state.preferences.sort.directoriesFirst)
-            Toggle("Show hidden files", isOn: $services.state.preferences.showHiddenFiles)
+            Toggle("Show hidden files by default", isOn: $services.state.preferences.showHiddenFiles)
             Toggle("Reopen tabs from last session", isOn: $services.state.preferences.restoreTabs)
             LabeledContent("New tabs open") {
                 HStack {
-                    Text(services.preferences.startPath ?? "Home folder")
+                    Text(services.preferences.startPath ?? ThisMac.title)
                         .lineLimit(1)
                         .truncationMode(.middle)
                     Button("Choose…") {

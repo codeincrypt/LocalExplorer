@@ -103,8 +103,11 @@ final class WindowModel: ObservableObject {
     private func add(_ tab: TabModel, after index: Int? = nil) {
         // Views observe the active tab directly; the window only republishes which tab
         // is active, so a selection change does not re-render the whole window.
+        tab.showsHiddenFiles = { [weak self] url in
+            self?.services.preferences.showsHiddenFiles(in: url) ?? false
+        }
         tab.onVisit = { [weak self] url in
-            self?.services.recordVisit(url)
+            if !ThisMac.isThisMac(url) { self?.services.recordVisit(url) }
             self?.persistTabs()
         }
         if let index { tabs.insert(tab, at: min(index + 1, tabs.count)) } else { tabs.append(tab) }
@@ -112,7 +115,6 @@ final class WindowModel: ObservableObject {
 
     func newTab(at url: URL? = nil) {
         let tab = TabModel(url: url ?? activeTab.currentURL, preferences: services.preferences, fileSystem: services.fileSystem)
-        tab.showHidden = activeTab.showHidden
         add(tab, after: tabs.firstIndex { $0.id == activeTabID })
         activeTabID = tab.id
         tab.start()
@@ -216,9 +218,9 @@ final class WindowModel: ObservableObject {
         case .deletePermanently: deleteConfirmation = DeleteConfirmation(urls: tab.selectedURLs)
         case .addToFavorites:
             let targets = tab.selectedItems.filter(\.isNavigableDirectory).map(\.url)
-            for url in targets.isEmpty ? [tab.currentURL] : targets { services.addFavorite(url) }
+            for url in targets.isEmpty && !tab.isThisMac ? [tab.currentURL] : targets { services.addFavorite(url) }
         case .grantAccess:
-            if let url = services.grantAccess(suggesting: tab.currentURL) { tab.navigate(to: url) }
+            if let url = services.grantAccess(suggesting: tab.isThisMac ? nil : tab.currentURL) { tab.navigate(to: url) }
         case .copy: services.clipboard.write(tab.selectedURLs, cut: false)
         case .cut: services.clipboard.write(tab.selectedURLs, cut: true)
         case .paste: paste()
@@ -233,13 +235,15 @@ final class WindowModel: ObservableObject {
         case .togglePreviewPane: showPreviewPane.toggle()
         case .toggleSidebar: showSidebar.toggle()
         case .quickPreview: toggleQuickLook()
-        case .refresh: tab.refresh()
+        case .refresh:
+            if tab.isThisMac { services.volumes.reload() } else { tab.refresh() }
         case .goBack: tab.goBack()
         case .goForward: tab.goForward()
         case .goToParent: tab.goUp()
         case .focusPath:
             isEditingPath = true
             requestFocus(.path)
+        case .goThisMac: tab.navigate(to: ThisMac.url)
         case .goHome: tab.navigate(to: AppConfiguration.home)
         case .goDesktop: go(.desktopDirectory)
         case .goDocuments: go(.documentDirectory)
@@ -276,9 +280,11 @@ final class WindowModel: ObservableObject {
     }
 
     func toggleHiddenFiles() {
-        let newValue = !activeTab.showHidden
-        for tab in tabs { tab.showHidden = newValue }
-        services.preferences.showHiddenFiles = newValue
+        // The choice belongs to the folder being viewed; other folders keep their own.
+        let tab = activeTab
+        guard !tab.isThisMac else { return }
+        tab.showHidden.toggle()
+        services.preferences.setShowsHiddenFiles(tab.showHidden, in: tab.currentURL)
     }
 
     func toggleQuickLook() {
@@ -429,6 +435,7 @@ final class WindowModel: ObservableObject {
     /// Finder semantics for drops: move within a volume, copy across volumes, and
     /// Option forces a copy.
     func handleDrop(_ urls: [URL], into destination: URL) -> Bool {
+        guard !ThisMac.isThisMac(destination) else { return false }
         let sources = urls.filter { $0.standardizedFileURL != destination.standardizedFileURL }
         guard !sources.isEmpty else { return false }
         let optionDown = NSEvent.modifierFlags.contains(.option)

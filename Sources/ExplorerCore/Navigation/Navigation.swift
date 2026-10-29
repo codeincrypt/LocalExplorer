@@ -61,6 +61,7 @@ public enum PathBreadcrumbs {
     /// `url`. `rootName` labels "/" (for example the startup volume name).
     public static func components(for url: URL, home: URL? = nil, rootName: String = "/") -> [Breadcrumb] {
         let target = url.standardizedFileURL
+        if ThisMac.isThisMac(target) { return [Breadcrumb(name: ThisMac.title, url: ThisMac.url)] }
         var result: [Breadcrumb] = []
         if let home = home?.standardizedFileURL, isDescendant(target, of: home, orEqual: true) {
             result.append(Breadcrumb(name: home.lastPathComponent, url: home))
@@ -92,6 +93,7 @@ public enum PathBreadcrumbs {
 
     /// `~/Documents` style display path.
     public static func abbreviated(_ url: URL, home: URL) -> String {
+        if ThisMac.isThisMac(url) { return ThisMac.title }
         let path = url.standardizedFileURL.path
         let homePath = home.standardizedFileURL.path
         if path == homePath { return "~" }

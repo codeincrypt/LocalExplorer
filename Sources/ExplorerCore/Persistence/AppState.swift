@@ -26,7 +26,8 @@ public struct GlassColor: Codable, Equatable, Sendable {
         self.blue = Self.clamp(blue)
     }
 
-    public static let `default` = GlassColor(red: 0.16, green: 0.42, blue: 0.98)
+    /// Dark slate blue (#21303C).
+    public static let `default` = GlassColor(red: 33.0 / 255, green: 48.0 / 255, blue: 60.0 / 255)
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -52,7 +53,11 @@ public enum GlassIntensity: String, Codable, CaseIterable, Sendable {
 public struct AppPreferences: Codable, Equatable, Sendable {
     public var defaultViewMode: ViewMode = .details
     public var sort = FileSortDescriptor()
+    /// Whether hidden files show in folders that have no setting of their own.
     public var showHiddenFiles = false
+    /// Per-folder overrides of `showHiddenFiles`, keyed by standardized absolute path.
+    /// Applies to that folder only, not to its subfolders.
+    public var hiddenFilesByFolder: [String: Bool] = [:]
     public var showPreviewPane = true
     public var showSidebar = true
     public var tileSize: Double = 112
@@ -61,7 +66,7 @@ public struct AppPreferences: Codable, Equatable, Sendable {
     /// Absolute path of the folder new tabs open; `nil` means the home folder.
     public var startPath: String?
     public var appearance: AppearanceMode = .system
-    public var glassTint: GlassTint = .ocean
+    public var glassTint: GlassTint = .custom
     public var glassIntensity: GlassIntensity = .balanced
     /// Colour used when `glassTint` is `.custom`.
     public var glassCustomColor = GlassColor.default
@@ -72,6 +77,15 @@ public struct AppPreferences: Codable, Equatable, Sendable {
     public var useLiquidGlass = true
     public var restoreTabs = true
     public var thumbnailCacheLimitMB: Int = 256
+
+    /// Whether hidden files show in `folder`: its own setting if it has one, else the default.
+    public func showsHiddenFiles(in folder: URL) -> Bool {
+        hiddenFilesByFolder[folder.standardizedFileURL.path] ?? showHiddenFiles
+    }
+
+    public mutating func setShowsHiddenFiles(_ show: Bool, in folder: URL) {
+        hiddenFilesByFolder[folder.standardizedFileURL.path] = show
+    }
 
     /// Upper bound for `glassTransparency`; beyond this the panels lose their shape.
     public static let maxGlassTransparency: Double = 0.85
@@ -86,6 +100,7 @@ public struct AppPreferences: Codable, Equatable, Sendable {
         defaultViewMode = (try? c.decode(ViewMode.self, forKey: .defaultViewMode)) ?? d.defaultViewMode
         sort = (try? c.decode(FileSortDescriptor.self, forKey: .sort)) ?? d.sort
         showHiddenFiles = (try? c.decode(Bool.self, forKey: .showHiddenFiles)) ?? d.showHiddenFiles
+        hiddenFilesByFolder = (try? c.decode([String: Bool].self, forKey: .hiddenFilesByFolder)) ?? d.hiddenFilesByFolder
         showPreviewPane = (try? c.decode(Bool.self, forKey: .showPreviewPane)) ?? d.showPreviewPane
         showSidebar = (try? c.decode(Bool.self, forKey: .showSidebar)) ?? d.showSidebar
         tileSize = (try? c.decode(Double.self, forKey: .tileSize)) ?? d.tileSize

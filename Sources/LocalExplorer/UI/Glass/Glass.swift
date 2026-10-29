@@ -91,7 +91,7 @@ struct GlassTheme {
 }
 
 private struct GlassThemeKey: EnvironmentKey {
-    static let defaultValue = GlassTheme(tint: .ocean, intensity: .balanced, useLiquidGlass: true, scheme: .light)
+    static let defaultValue = GlassTheme(tint: .custom, intensity: .balanced, useLiquidGlass: true, scheme: .light)
 }
 
 extension EnvironmentValues {
@@ -237,10 +237,10 @@ struct GlassIconButtonStyle: ButtonStyle {
                 .frame(minWidth: size.width, minHeight: size.height)
                 .foregroundStyle(isOn ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
                 .background {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(background)
+                    // Capsule so the highlight stays concentric with the capsule `GlassGroup` around it.
+                    Capsule(style: .continuous).fill(background)
                 }
-                .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .contentShape(Capsule(style: .continuous))
                 .opacity(isEnabled ? 1 : 0.35)
                 .onHover { hovering = $0 }
                 .animation(.easeOut(duration: 0.12), value: hovering)

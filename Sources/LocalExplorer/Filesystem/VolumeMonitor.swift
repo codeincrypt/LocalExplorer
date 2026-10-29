@@ -21,6 +21,10 @@ final class VolumeMonitor: ObservableObject {
     }
 
     @Published private(set) var volumes: [Volume] = []
+    /// Used/free space by volume path. Read off the main thread because a network
+    /// volume can be slow to answer.
+    @Published private(set) var capacities: [String: CapacityUsage] = [:]
+    private var capacityTask: Task<Void, Never>?
     private var observers: [NSObjectProtocol] = []
 
     init() {
@@ -62,6 +66,21 @@ final class VolumeMonitor: ObservableObject {
         .sorted { a, b in
             if a.isRoot != b.isRoot { return a.isRoot }
             return a.name.localizedStandardCompare(b.name) == .orderedAscending
+        }
+        refreshCapacities()
+    }
+
+    private func refreshCapacities() {
+        capacityTask?.cancel()
+        let urls = volumes.map(\.url)
+        capacityTask = Task { [weak self] in
+            let result = await Task.detached(priority: .utility) {
+                var map: [String: CapacityUsage] = [:]
+                for url in urls { map[url.path] = FileSystemFacts.capacity(at: url) }
+                return map
+            }.value
+            guard let self, !Task.isCancelled else { return }
+            self.capacities = result
         }
     }
 

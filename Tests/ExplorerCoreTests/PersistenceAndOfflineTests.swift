@@ -21,6 +21,26 @@ final class PersistenceTests: XCTestCase {
         XCTAssertEqual(reloaded.favorites.count, 1, "duplicate favorites are ignored")
     }
 
+    func testHiddenFilesSettingIsPerFolder() throws {
+        var prefs = AppPreferences()
+        let a = URL(fileURLWithPath: "/Users/k/A")
+        let b = URL(fileURLWithPath: "/Users/k/B")
+        XCTAssertFalse(prefs.showsHiddenFiles(in: a))
+
+        prefs.setShowsHiddenFiles(true, in: a)
+        XCTAssertTrue(prefs.showsHiddenFiles(in: a))
+        XCTAssertFalse(prefs.showsHiddenFiles(in: b), "other folders keep the default")
+        XCTAssertFalse(prefs.showsHiddenFiles(in: a.appendingPathComponent("sub")), "subfolders are not affected")
+
+        prefs.showHiddenFiles = true
+        prefs.setShowsHiddenFiles(false, in: b)
+        XCTAssertFalse(prefs.showsHiddenFiles(in: b), "a folder override beats the default")
+        XCTAssertTrue(prefs.showsHiddenFiles(in: URL(fileURLWithPath: "/Users/k/C")))
+
+        let data = try JSONEncoder().encode(prefs)
+        XCTAssertEqual(try JSONDecoder().decode(AppPreferences.self, from: data), prefs)
+    }
+
     func testCorruptFileFallsBackAndIsMovedAside() throws {
         let dir = try TempDirectory()
         let url = dir.url.appendingPathComponent("state.json")
@@ -34,7 +54,7 @@ final class PersistenceTests: XCTestCase {
         let json = #"{"preferences":{"defaultViewMode":"gallery","futureSetting":42,"glassTint":"unknown-tint"},"favorites":[]}"#
         let state = try JSONDecoder().decode(AppState.self, from: Data(json.utf8))
         XCTAssertEqual(state.preferences.defaultViewMode, .gallery)
-        XCTAssertEqual(state.preferences.glassTint, .ocean)
+        XCTAssertEqual(state.preferences.glassTint, .custom)
         XCTAssertEqual(state.preferences.sort, FileSortDescriptor())
     }
 

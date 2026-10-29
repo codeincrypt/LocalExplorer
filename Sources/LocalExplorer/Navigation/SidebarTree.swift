@@ -83,9 +83,11 @@ final class SidebarTree: ObservableObject {
 
     /// Expands the chain from the closest root above `target` down to its parent, so the
     /// current folder is visible in the tree. Only the deepest root is used, so
-    /// `~/Documents/Notes` opens under Documents rather than also under Home.
+    /// `~/Documents/Notes` opens under Documents rather than also under Home. A target that
+    /// is itself a root is already visible as a top-level row, so nothing is expanded.
     func reveal(_ target: URL, roots: [(section: String, url: URL)]) {
         let target = target.standardizedFileURL
+        if roots.contains(where: { $0.url.standardizedFileURL == target }) { return }
         let candidates = roots.filter { PathBreadcrumbs.isDescendant(target, of: $0.url) }
         guard let best = candidates.max(by: { $0.url.pathComponents.count < $1.url.pathComponents.count }) else { return }
         var changed = false

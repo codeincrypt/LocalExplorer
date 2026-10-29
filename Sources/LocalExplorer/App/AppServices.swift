@@ -69,7 +69,7 @@ final class AppServices: ObservableObject {
                 return URL(fileURLWithPath: path)
             }
         }
-        return AppConfiguration.home
+        return ThisMac.url
     }
 
     // MARK: Persistence

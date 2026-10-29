@@ -20,7 +20,7 @@ final class CommandTests: XCTestCase {
             .viewGallery: "⌘3", .viewDetails: "⌘4", .quickPreview: "Space", .cancel: "⎋",
             .search: "⌘F", .focusPath: "⌘L", .goToParent: "⌘↑", .goBack: "⌘[",
             .goForward: "⌘]", .newTab: "⌘T", .closeTab: "⌘W", .refresh: "⌘R",
-            .showContextMenu: "⌃↩",
+            .showContextMenu: "⌃↩", .goThisMac: "⇧⌘C",
         ]
         for (command, display) in expected {
             XCTAssertEqual(command.shortcut?.displayString, display, "\(command)")

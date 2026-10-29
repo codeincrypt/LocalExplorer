@@ -248,6 +248,15 @@ public enum FileSystemFacts {
         return nil
     }
 
+    /// Total and available capacity of the volume containing `url`. Can block on an
+    /// unresponsive network volume, so call it off the main thread.
+    public static func capacity(at url: URL) -> CapacityUsage? {
+        guard let values = try? url.resourceValues(forKeys: [.volumeTotalCapacityKey]),
+              let total = values.volumeTotalCapacity, total > 0,
+              let available = availableCapacity(at: url) else { return nil }
+        return CapacityUsage(total: Int64(total), available: available)
+    }
+
     /// Total logical size of a file or directory tree. Symbolic links are counted as
     /// links (not followed). Checks for task cancellation between entries.
     public static func totalSize(of url: URL) throws -> Int64 {

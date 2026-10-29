@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(CoreGraphics)
+import CoreGraphics
+#endif
 
 /// Modifier state relevant to selection clicks.
 public struct SelectionModifiers: OptionSet, Sendable, Hashable {
@@ -109,6 +112,14 @@ public struct SelectionModel: Equatable, Sendable {
         return id
     }
 
+    /// Applies a rubber-band drag: the selection becomes `base` (the selection when the
+    /// drag started, empty unless extending) plus everything the rectangle touches.
+    public mutating func applyMarquee(hits: Set<String>, base: Set<String>, order: [String]) {
+        selected = base.union(hits)
+        cursor = order.last { hits.contains($0) } ?? order.last { selected.contains($0) }
+        anchor = order.first { hits.contains($0) } ?? cursor
+    }
+
     /// Drops identifiers that disappeared after a refresh, keeping the rest stable.
     public mutating func reconcile(with order: [String]) {
         let present = Set(order)
@@ -164,6 +175,24 @@ public struct SelectionModel: Equatable, Sendable {
             default: return index
             }
         }
+    }
+}
+
+public enum MarqueeMath {
+    /// A rectangle spanning two drag points, whichever corner it was dragged towards.
+    public static func rect(from start: CGPoint, to end: CGPoint) -> CGRect {
+        CGRect(x: min(start.x, end.x), y: min(start.y, end.y), width: abs(end.x - start.x), height: abs(end.y - start.y))
+    }
+
+    /// Identifiers whose frames the marquee touches (edges count, like Explorer/Finder).
+    public static func hits(in marquee: CGRect, frames: [String: CGRect]) -> Set<String> {
+        var result: Set<String> = []
+        for (id, frame) in frames
+        where marquee.minX <= frame.maxX && marquee.maxX >= frame.minX
+            && marquee.minY <= frame.maxY && marquee.maxY >= frame.minY {
+            result.insert(id)
+        }
+        return result
     }
 }
 

@@ -86,7 +86,7 @@ struct AddressBar: View {
                     .focused(focus, equals: .path)
                     .onSubmit(commit)
                     .onExitCommand(perform: endEditing)
-                    .onAppear { text = tab.currentURL.path }
+                    .onAppear { text = editablePath }
                     .accessibilityLabel("Path")
                     .accessibilityIdentifier("pathField")
             } else {
@@ -125,15 +125,19 @@ struct AddressBar: View {
         .contentShape(Capsule())
         .onTapGesture(count: 2) { model.perform(.focusPath) }
         .onChange(of: model.isEditingPath) { _, editing in
-            if editing { text = tab.currentURL.path }
+            if editing { text = editablePath }
         }
         .onChange(of: focus.wrappedValue) { _, newValue in
             if model.isEditingPath && newValue != .path { model.isEditingPath = false }
         }
     }
 
+    /// The "This Mac" page has no path of its own, so the field starts empty.
+    private var editablePath: String { tab.isThisMac ? "" : tab.currentURL.path }
+
     private func commit() {
-        guard let url = PathInputParser.resolve(text, relativeTo: tab.currentURL, home: AppConfiguration.home) else {
+        let base = tab.isThisMac ? AppConfiguration.home : tab.currentURL
+        guard let url = PathInputParser.resolve(text, relativeTo: base, home: AppConfiguration.home) else {
             NSSound.beep()
             return
         }
@@ -169,7 +173,7 @@ private struct BreadcrumbButton: View {
         Button { model.navigate(to: crumb.url) } label: {
             HStack(spacing: 4) {
                 if isFirst {
-                    Image(systemName: crumb.url == AppConfiguration.home ? "house.fill" : "internaldrive")
+                    Image(systemName: crumb.url == ThisMac.url ? "desktopcomputer" : (crumb.url == AppConfiguration.home ? "house.fill" : "internaldrive"))
                         .font(.system(size: 10))
                 }
                 Text(crumb.name)

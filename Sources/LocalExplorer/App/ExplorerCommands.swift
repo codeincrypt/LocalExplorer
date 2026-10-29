@@ -110,6 +110,7 @@ struct ExplorerCommands: Commands {
             item(.goForward)
             item(.goToParent)
             Divider()
+            item(.goThisMac)
             item(.goHome)
             item(.goDesktop)
             item(.goDocuments)

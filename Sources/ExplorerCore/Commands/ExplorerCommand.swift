@@ -74,7 +74,7 @@ public enum ExplorerCommand: String, CaseIterable, Sendable {
     case toggleHiddenFiles, togglePreviewPane, toggleSidebar, quickPreview, refresh
     // Go
     case goBack, goForward, goToParent, focusPath
-    case goHome, goDesktop, goDocuments, goDownloads, goApplications
+    case goThisMac, goHome, goDesktop, goDocuments, goDownloads, goApplications
     // Context
     case showContextMenu
 
@@ -112,6 +112,7 @@ public enum ExplorerCommand: String, CaseIterable, Sendable {
         case .goForward: return "Forward"
         case .goToParent: return "Enclosing Folder"
         case .focusPath: return "Go to Path…"
+        case .goThisMac: return ThisMac.title
         case .goHome: return "Home"
         case .goDesktop: return "Desktop"
         case .goDocuments: return "Documents"
@@ -155,6 +156,7 @@ public enum ExplorerCommand: String, CaseIterable, Sendable {
         case .goForward: return "chevron.right"
         case .goToParent: return "arrow.turn.left.up"
         case .focusPath: return "character.cursor.ibeam"
+        case .goThisMac: return "desktopcomputer"
         case .goHome: return "house"
         case .goDesktop: return "menubar.dock.rectangle"
         case .goDocuments: return "doc"
@@ -174,7 +176,7 @@ public enum ExplorerCommand: String, CaseIterable, Sendable {
         case .viewTiles, .viewCompactList, .viewGallery, .viewDetails, .toggleHiddenFiles,
              .togglePreviewPane, .toggleSidebar, .quickPreview, .refresh:
             return .view
-        case .goBack, .goForward, .goToParent, .focusPath, .goHome, .goDesktop, .goDocuments,
+        case .goBack, .goForward, .goToParent, .focusPath, .goThisMac, .goHome, .goDesktop, .goDocuments,
              .goDownloads, .goApplications:
             return .go
         case .showContextMenu:
@@ -214,6 +216,7 @@ public enum ExplorerCommand: String, CaseIterable, Sendable {
         case .copyPath: return Shortcut(.character("c"), [.command, .option])
         case .togglePreviewPane: return Shortcut(.character("p"), [.command, .option])
         case .toggleSidebar: return Shortcut(.character("s"), [.command, .control])
+        case .goThisMac: return Shortcut(.character("c"), [.command, .shift])
         case .goHome: return Shortcut(.character("h"), [.command, .shift])
         case .goDesktop: return Shortcut(.character("d"), [.command, .shift])
         case .goDocuments: return Shortcut(.character("o"), [.command, .shift])

@@ -204,6 +204,24 @@ private struct FolderSummary: View {
     @Environment(\.glass) private var glass
 
     var body: some View {
+        if tab.isThisMac {
+            VStack(alignment: .leading, spacing: 12) {
+                Image(systemName: "desktopcomputer")
+                    .font(.system(size: 64, weight: .light))
+                    .foregroundStyle(glass.secondaryText)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                Text(ThisMac.title).font(.system(size: 15, weight: .semibold))
+                Text("Open a folder or drive to see its contents.")
+                    .font(.system(size: 11))
+                    .foregroundStyle(glass.secondaryText)
+            }
+        } else {
+            folderBody
+        }
+    }
+
+    private var folderBody: some View {
         VStack(alignment: .leading, spacing: 12) {
             Image(nsImage: FileIconProvider.icon(forPath: tab.currentURL.path))
                 .resizable()

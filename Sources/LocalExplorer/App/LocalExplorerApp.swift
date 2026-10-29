@@ -77,6 +77,7 @@ enum WindowRestoration {
         guard !consumed, AppServices.shared.preferences.restoreTabs,
               AppConfiguration.environmentStartPath == nil else { return nil }
         let urls = AppServices.shared.state.openTabs.compactMap { path -> URL? in
+            if ThisMac.isThisMac(URL(fileURLWithPath: path)) { return ThisMac.url }
             var isDir: ObjCBool = false
             guard FileManager.default.fileExists(atPath: path, isDirectory: &isDir), isDir.boolValue else { return nil }
             return URL(fileURLWithPath: path)
